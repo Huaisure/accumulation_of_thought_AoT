@@ -1,0 +1,20 @@
+import openai
+
+
+class GPT:
+    def __init__(self, api_key, model_id):
+        self.api_key = api_key
+        self.model_id = model_id
+
+    def get_response(self, prompt, instruct=None):
+        messages = self.prompt2messages(prompt, instruct)
+        client = openai.OpenAI(api_key=self.api_key, model_id=self.model_id)
+        response = client.chat.create(model=self.model_id, messages=messages)
+        return response.choices[0].message["content"]
+
+    def prompt2messages(self, prompt, instruct=None):
+        messages = []
+        if instruct is not None:
+            messages.append({"role": "system", "content": instruct})
+        messages.append({"role": "user", "content": prompt})
+        return messages
