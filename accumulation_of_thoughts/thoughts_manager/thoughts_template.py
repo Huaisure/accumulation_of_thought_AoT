@@ -53,19 +53,29 @@ class ThoughtsTemplate:
             templates = file.readlines()
         template = json.loads(templates[idx])
         self.D, self.M, self.E, self.C = (
-            template[idx]["D"],
-            template[idx]["M"],
-            template[idx]["E"],
-            template[idx]["C"],
+            template["D"],
+            template["M"],
+            template["E"],
+            template["C"],
         )
 
-    def update(self, idx, new_template):
+    def __dict__(self) -> dict:
+        return {"D": self.D, "M": self.M, "E": self.E, "C": self.C}
+
+    def upgrade(self, new_template: "ThoughtsTemplate"):
         """
-        Currently, this method only supports updating the template
-        in the small file.
+        upgrade current template with the new template
         """
-        with open(self.path, "r") as file:
-            templates = file.readlines()
-        templates[idx] = new_template
-        with open(self.path, "w") as file:
-            file.writelines(templates)
+        new_file = []
+        idx = 0
+        # TODO: problem here
+        with open(self.path, "r") as f:
+            for line in f:
+                if idx == self.idx:
+                    new_file.append(json.dumps(new_template.__dict__()))
+                else:
+                    new_file.append(line)
+                idx += 1
+        with open(self.path, "w") as f:
+            for line in new_file:
+                f.write(line)

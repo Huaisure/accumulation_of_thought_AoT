@@ -38,6 +38,7 @@ class AccumulationOfThoughts:
             llm_assistant=self.llm,
             emb_pth=emb_pth,
             threshold=threshold,
+            logger=logger,
         )
         self.task = inputs
         self.has_template = False
@@ -66,5 +67,7 @@ class AccumulationOfThoughts:
             A=self.template["E"]["A"],
             C=self.template["C"],
         )
+        self.logger.info(f"*********user_prompt**********\n {user_prompt}")
         response = self.llm.get_response(system_prompt, user_prompt)
-        self.logger.info(f"Response: {response}")
+        self.logger.info(f"**********Response***********\n {response}")
+        return response

@@ -2,7 +2,7 @@ from .retriever import Retriever
 from .thoughts_template import ThoughtsTemplate
 from .sentence_model import SentenceModel
 from ..llm import GPT, Pipeline, GuidanceLM
-from ..prompts import NewTemplatePrompt
+from ..prompts import NewTemplatePrompt, UpgradePrompt
 
 from typing import Union
 
@@ -14,7 +14,8 @@ class ThoughtsManager:
     methods:
 
     1.extract thoughts template from QA pairs. A thoughts template consists of a 4-tuple: \
-        (Description of the task, Method to solve the task, An example of the task and its answer, The classification of the task)
+        (Description of the task, Method to solve the task, An example of the task and its answer, The classification of the task)\
+            which means this manager can learn from huge amounts of QA pairs datasets.
 
     2.given a task, return the corresponding thoughts template
 
@@ -33,6 +34,7 @@ class ThoughtsManager:
         emb_pth: str = None,
         threshold: float = 0.5,
         execute_search_all: bool = False,
+        logger=None,
     ):
         self.path = thoughts_template_path
         self.emb = emb_pth
@@ -42,12 +44,14 @@ class ThoughtsManager:
         self.sentencemodel = SentenceModel(sentence_model_name)
         # self.thoughts_template = ThoughtsTemplate(thoughts_template_path)
         self.retriever = Retriever(self.sentencemodel, self.emb, self.threshold)
+        self.logger = logger
 
     def get_template(self, task) -> ThoughtsTemplate:
         """
         get the corresponding template given a task
         """
         idx = self.retriever.search(task)
+        self.logger.info(f"idx: {idx}")
         if idx == -1:
             # if the similarity is less than the threshold
             # create a new template
@@ -103,6 +107,32 @@ class ThoughtsManager:
     def _extract_template_from_qa_pair(self, qa_pair) -> ThoughtsTemplate:
         # TODO
         pass
+
+    def upgrade_template(
+        self, new_task: str, new_answer: str, old_template: ThoughtsTemplate
+    ):
+        """
+        upgrade the template
+        """
+        new_template = self._learn_from_new_task(new_task, new_answer, old_template)
+        old_template.upgrade(new_template)
+
+    def _learn_from_new_task(
+        self, new_task: str, new_answer: str, old_template: ThoughtsTemplate
+    ):
+        """
+        learn from the new task and the answer
+        """
+        # TODO
+        # learn from the new task and the answer
+        system_prompt = UpgradePrompt.system_prompt
+        user_prompt = UpgradePrompt.user_prompt.format(
+            new_task, new_answer, old_template
+        )
+        assistant_prompt = UpgradePrompt.assistant_prompt
+        response = self.llm.get_response(system_prompt, user_prompt, assistant_prompt)
+        new_template = self._extract_template_from_response(response, assistant_prompt)
+        return new_template
 
     def add_template(self, new_template):
         with open(self.path, "a") as file:
