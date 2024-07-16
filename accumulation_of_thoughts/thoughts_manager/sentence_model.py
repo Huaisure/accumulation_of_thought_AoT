@@ -20,4 +20,4 @@ class SentenceModel:
         if type(emb2) is str:
             emb2 = self.encode(emb2)
 
-        return self.model.cosine_similarity(emb1, emb2)
+        return self.model.similarity(emb1, emb2)

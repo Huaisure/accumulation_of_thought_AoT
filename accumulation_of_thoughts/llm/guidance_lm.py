@@ -15,7 +15,7 @@ class GuidanceLM:
                 base_url=" ",
             )
         else:
-            self.llm = models.LlamaCpp(model_name, temperature=0.4)
+            self.llm = models.TransformersChat(model_name)
 
     def get_response(self, system_prompt, user_prompt, assistant_prompt=None):
         lm = self.llm
@@ -24,6 +24,23 @@ class GuidanceLM:
         with user():
             lm += user_prompt
         with assistant():
-            lm += assistant_prompt
-            lm += gen(max_tokens=2048, name="assistant")
+            if assistant_prompt is not None:
+                res = {}
+                for i in len(assistant_prompt):
+                    lm += assistant_prompt[i]
+                    if i < len(assistant_prompt) - 1:
+                        lm += gen(
+                            name="assistant",
+                            max_tokens=1024,
+                            stop=[assistant_prompt[i + 1]],
+                        )
+                        res[assistant_prompt[i]] = lm["assistant"]
+
+                    else:
+                        lm += assistant_prompt[-1]
+                        lm += gen(name="assistant", max_tokens=1024)
+                        res[assistant_prompt[i]] = lm["assistant"]
+                return res
+            else:
+                lm += gen(name="assistant", max_tokens=1024)
         return lm["assistant"]

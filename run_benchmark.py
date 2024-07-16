@@ -1,4 +1,5 @@
 import argparse
+import json
 import datetime
 
 from tqdm import tqdm
@@ -75,9 +76,15 @@ def main(args):
 
     with open(data_pth) as f:
         for line in f:
-            inputs = prompt + line.strip()
-            aot.run(inputs)
+            input = json.loads(line)["input"]
+            inputs = prompt + input
+            res = aot.run(inputs)
             tq.update(1)
+            output = {"input": input, "output": res}
+            with open(
+                f"experiments/{args.task}/{model_name}_{timestamp_str}.jsonl", "a"
+            ) as f_:
+                f_.write(json.dumps(output) + "\n")
     tq.close()
 
 

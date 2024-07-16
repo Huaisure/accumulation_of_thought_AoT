@@ -27,7 +27,8 @@ class Retriever:
         """
         sim = self.model.similarity(text, self.emb)
         max_sim = max(sim)
-        max_index = sim.index(max_sim)
+        # sim is tensor, get index of the max similarity
+        max_index = torch.argmax(sim).item()
         if create:
             # if create is True, return the index of the most similar template,
             # no matter the similarity is greater than the threshold or not.

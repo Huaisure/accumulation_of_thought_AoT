@@ -4,6 +4,8 @@ from .sentence_model import SentenceModel
 from ..llm import GPT, Pipeline, GuidanceLM
 from ..prompts import NewTemplatePrompt
 
+from typing import Union
+
 
 class ThoughtsManager:
     """
@@ -27,7 +29,7 @@ class ThoughtsManager:
         self,
         thoughts_template_path: str,
         sentence_model_name: str,
-        llm_assistant: GuidanceLM | GPT | Pipeline = None,
+        llm_assistant: Union[GuidanceLM, GPT, Pipeline] = None,
         emb_pth: str = None,
         threshold: float = 0.5,
         execute_search_all: bool = False,
@@ -64,11 +66,41 @@ class ThoughtsManager:
         )
         system_prompt = NewTemplatePrompt.system_prompt
         user_prompt = NewTemplatePrompt.user_prompt.format(self.task, template)
-        template_response = self.llm.get_response(system_prompt, user_prompt)
-        return self._extract_template_from_response(template_response)
-        # TODO
+        assistant_prompt = NewTemplatePrompt.assistant_prompt
+        # TODO: compare the effect of whether or not to give a template
+        template_response = self.llm.get_response(
+            system_prompt, user_prompt, assistant_prompt
+        )
+        return self._extract_template_from_response(template_response, assistant_prompt)
 
-    def _extract_template_from_response(self, response) -> ThoughtsTemplate:
+    def _extract_template_from_response(self, response, assist) -> ThoughtsTemplate:
+        """
+        extract the template from the response from gpt
+        """
+        # TODO
+        # Accoding to the rule made in the NewTemplatePrompt, extract the template from the response
+        if self.llm.__class__ == GuidanceLM:
+            if type(response) is not dict:
+                raise ValueError("The response should be a dict.")
+            tmp = {}
+            tmp["D"] = response[assist[0]]
+            tmp["M"] = response[assist[1]]
+            tmp["E"] = {}
+            tmp["E"]["Q"] = response[assist[3]]
+            tmp["E"]["A"] = response[assist[4]]
+            tmp["C"] = response[assist[5]]
+            return ThoughtsTemplate(**tmp)
+        else:
+            raise NotImplementedError("The method is not implemented yet")
+
+    def extract_template_from_qa_pairs(self, qa_pairs) -> ThoughtsTemplate:
+        """
+        extract the thoughts template from a list of qa pairs
+        """
+        for qa_pair in qa_pairs:
+            self._extract_template_from_qa_pair(qa_pair)
+
+    def _extract_template_from_qa_pair(self, qa_pair) -> ThoughtsTemplate:
         # TODO
         pass
 
