@@ -1,1 +1,0 @@
-from .ThoughtsTemplate import ThoughtsTemplate

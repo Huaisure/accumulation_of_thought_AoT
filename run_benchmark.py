@@ -1,6 +1,7 @@
 import argparse
 import datetime
 
+from tqdm import tqdm
 from .accumulation_of_thoughts import AccumulationOfThoughts
 from loguru import logger
 
@@ -18,6 +19,26 @@ def main(args):
     Sort a list of words alphabetically, placing them in a single line of text separated by spaces.
     Input:
     """
+
+    path_dict = {
+        "gameof24": "benchmarks/gameof24.jsonl",
+        "checkmate": "benchmarks/CheckmateInOne.jsonl",
+        "wordsorting": "benchmarks/word_sorting.jsonl",
+    }
+
+    prompt_dict = {
+        "gameof24": GameOf24,
+        "checkmate": CheckmateInOne,
+        "wordsorting": WordSorting,
+    }
+
+    if args.task not in path_dict:
+        raise ValueError(
+            f"Task {args.task} not supported. Choose from {list(path_dict.keys())}"
+        )
+    data_pth = path_dict[args.task]
+    prompt = prompt_dict[args.task]
+
     aot = AccumulationOfThoughts(
         model_name=args.model,
         api_key=args.api_key,
@@ -27,16 +48,47 @@ def main(args):
         threshold=args.threshold,
         inputs=None,
         use_guidance=True,
+        logger=logger,
     )
 
     now = datetime.datetime.now()
     timestamp_str = now.strftime("%Y-%m-%d-%H:%M:%S")
-    logger.add(f"logs/{timestamp_str}.log")
+    logger.remove()
+    logger.add(
+        f"logs/{args.task}_{timestamp_str}.log", format="{time} | {level} | {message}"
+    )
+    logger.info(f"Running benchmark for task {args.task}")
+    logger.info(f"Model: {args.model}")
+    logger.info(f"Sentence model: {args.smodel}")
+    logger.info(f"threshold: {args.threshold}")
+    logger.info(f"Start Time:{timestamp_str}")
+
+    # get the number of lines in the file
+    count = 0
+    with open(data_pth) as f:
+        for ff in f:
+            count += 1
+
+    tq = tqdm(total=count)
+
+    with open(data_pth) as f:
+        for line in f:
+            inputs = prompt + line.strip()
+            aot.run(inputs)
+            tq.update(1)
+    tq.close()
 
 
 if __name__ == "__main__":
+    # fmt: off
     parser = argparse.ArgumentParser(description="Run benchmark for Accumulation of Thoughts")
-    parser.add_argument("--config", type=str, required=True, help="Path to YAML configuration file.")
+    parser.add_argument("--task", type=str, default="gameof24", help="Task name")
+    parser.add_argument("--model", type=str, default="gpt4o", help="Model name")
+    parser.add_argument("--api_key", type=str, default=None, help="API key")
+    parser.add_argument("--smodel", "-s", type=str, default=None, required=True, help="Sentence model name")
+    parser.add_argument("--emb", type=str, default=None, help="Path to embeddings")
+    parser.add_argument("--template", "-t", type=str, default=None, help="Path to templates")
+    parser.add_argument("--threshold", type=float, default=0.5, help="Threshold for similarity")
     args = parser.parse_args()
 
     main(args)

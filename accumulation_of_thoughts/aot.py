@@ -1,6 +1,5 @@
-from .retriever import Retriever
-from .thoughts_template import ThoughtsTemplate
-from loguru import logger
+from .thoughts_manager import ThoughtsManager, ThoughtsTemplate, Retriever
+from .prompts import BasicPrompt, NewTemplatePrompt
 
 
 class AccumulationOfThoughts:
@@ -14,9 +13,10 @@ class AccumulationOfThoughts:
         threshold=0.5,
         inputs=None,
         use_guidance=False,
+        logger=None,
     ):
-        self.retriever = Retriever(sentence_model_name, emb_pth, threshold)
-        self.thoughts_template = ThoughtsTemplate(template_pth)
+
+        self.logger = logger
 
         if not use_guidance:
             if api_key is not None:
@@ -31,41 +31,35 @@ class AccumulationOfThoughts:
             from .llm import GuidanceLM
 
             self.llm = GuidanceLM(model_name, api_key)
+
+        self.thoughts_manager = ThoughtsManager(
+            template_pth,
+            sentence_model_name,
+            llm_assistant=self.llm,
+            emb_pth=emb_pth,
+            threshold=threshold,
+        )
         self.task = inputs
         self.has_template = False
 
-    def get_template(self, idx):
-        idx = self.retriever.search(self.task)
-        if idx == -1:
-            self.has_template = False
-        else:
-            self.has_template = True
-            return self.thoughts_template.gettemplate(idx)
+    def get_template(self):
+        self.template = self.thoughts_manager.get_template(self.task)
 
-    def create_template_according_to_task(self):
-        """
-        this method is used to create a new template according to the task,
-        considering some tasks may not have a template in the template file.
-        """
-        template = self.retriever.search(self.task, create=True)
-        template = self.llm.get_respond(template)
-        pass
-
-    def update_template(self, idx, new_template):
-        self.thoughts_template.update(idx, new_template)
+    # def update_template(self, idx, new_template):
+    #     self.thoughts_template.update(idx, new_template)
 
     def update_input(self, new_input):
         self.task = new_input
+        self.has_template = False
 
-    def run(self):
-        template = self.get_template(self.task)
-        if self.has_template:
-            logger.success("Get template successfully!")
-            logger.info(f"Template: {template}")
-        else:
-            logger.error("No template found!")
-            template = self.create_template_according_to_task()
-            logger.info(f"Create a new template: {template}")
-        response = self.llm.get_respond(self.task, template)
-        logger.info(f"Response: {response}")
-        pass
+    def run(self, new_input):
+        self.update_input(new_input)
+        self.get_template()
+        self.logger.success("Get template successfully!")
+        self.logger.info(f"Template: {self.template}")
+        system_prompt = BasicPrompt.system_prompt
+        user_prompt = BasicPrompt.user_prompt.format(
+            user_input=self.task, thought_template=self.template
+        )
+        response = self.llm.get_response(system_prompt, user_prompt)
+        self.logger.info(f"Response: {response}")
