@@ -1,1 +1,1 @@
-# thoughtrag
+# Accumulation of Thought
