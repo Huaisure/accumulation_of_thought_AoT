@@ -59,7 +59,12 @@ class AccumulationOfThoughts:
         self.logger.info(f"Template: {self.template}")
         system_prompt = BasicPrompt.system_prompt
         user_prompt = BasicPrompt.user_prompt.format(
-            user_input=self.task, thought_template=self.template
+            user_input=self.task,
+            D=self.template["D"],
+            M=self.template["M"],
+            Q=self.template["E"]["Q"],
+            A=self.template["E"]["A"],
+            C=self.template["C"],
         )
         response = self.llm.get_response(system_prompt, user_prompt)
         self.logger.info(f"Response: {response}")

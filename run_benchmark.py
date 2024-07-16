@@ -53,9 +53,11 @@ def main(args):
 
     now = datetime.datetime.now()
     timestamp_str = now.strftime("%Y-%m-%d-%H:%M:%S")
+    model_name = args.model.strip("/").split("/")[-1]
     logger.remove()
     logger.add(
-        f"logs/{args.task}_{timestamp_str}.log", format="{time} | {level} | {message}"
+        f"logs/{args.task}_{model_name}_{timestamp_str}.log",
+        format="{time} | {level} | {message}",
     )
     logger.info(f"Running benchmark for task {args.task}")
     logger.info(f"Model: {args.model}")

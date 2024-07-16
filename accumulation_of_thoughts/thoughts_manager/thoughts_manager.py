@@ -59,7 +59,9 @@ class ThoughtsManager:
         considering some tasks may not have a template in the template file.
         """
         # find the most similar template
-        template = self.retriever.search(self.task, create=True)
+        template = ThoughtsTemplate(
+            self.path, self.retriever.search(self.task, create=True)
+        )
         system_prompt = NewTemplatePrompt.system_prompt
         user_prompt = NewTemplatePrompt.user_prompt.format(self.task, template)
         template_response = self.llm.get_response(system_prompt, user_prompt)
