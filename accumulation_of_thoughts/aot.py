@@ -22,7 +22,7 @@ class AccumulationOfThoughts:
             if api_key is not None:
                 from .llm import GPT
 
-                self.llm = GPT(api_key)
+                self.llm = GPT(api_key, model_name)
             else:
                 from .llm import Pipeline
 
@@ -67,6 +67,16 @@ class AccumulationOfThoughts:
             A=self.template["E"]["A"],
             C=self.template["C"],
         )
+        test = 1
+        if test:
+            system_prompt = BasicPrompt.system_prompt_without_classification
+            user_prompt = BasicPrompt.user_prompt_without_classification.format(
+                user_input=self.task,
+                D=self.template["D"],
+                M=self.template["M"],
+                Q=self.template["E"]["Q"],
+                A=self.template["E"]["A"],
+            )
         self.logger.info(f"*********user_prompt**********\n {user_prompt}")
         response = self.llm.get_response(system_prompt, user_prompt)
         self.logger.info(f"**********Response***********\n {response}")

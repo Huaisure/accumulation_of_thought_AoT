@@ -8,9 +8,14 @@ class GPT:
 
     def get_response(self, prompt, instruct=None):
         messages = self.prompt2messages(prompt, instruct)
-        client = openai.OpenAI(api_key=self.api_key, model_id=self.model_id)
-        response = client.chat.create(model=self.model_id, messages=messages)
-        return response.choices[0].message["content"]
+        client = openai.OpenAI(
+            api_key=self.api_key, base_url="https://threefive.gpt7.link/v1"
+        )
+        response = client.chat.completions.create(
+            model=self.model_id, messages=messages
+        )
+        # print("response:",response)
+        return response.choices[0].message.content
 
     def prompt2messages(self, prompt, instruct=None):
         messages = []

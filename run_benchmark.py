@@ -3,7 +3,7 @@ import json
 import datetime
 
 from tqdm import tqdm
-from .accumulation_of_thoughts import AccumulationOfThoughts
+from accumulation_of_thoughts import AccumulationOfThoughts
 from loguru import logger
 
 
