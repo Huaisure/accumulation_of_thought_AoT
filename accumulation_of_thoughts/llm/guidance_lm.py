@@ -3,8 +3,6 @@ from guidance import gen
 
 import torch
 
-# import ipdb
-
 
 class GuidanceLM:
     def __init__(self, model_name, api_key=None) -> None:
@@ -30,7 +28,6 @@ class GuidanceLM:
         lm = self.llm
         with system():
             lm += system_prompt
-            # ipdb.set_trace()
         with user():
             lm += user_prompt
         with assistant():

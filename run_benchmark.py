@@ -3,7 +3,7 @@ import json
 import datetime
 
 from tqdm import tqdm
-from accumulation_of_thoughts import AccumulationOfThoughts
+from accumulation_of_thoughts import AccumulationOfThoughts, Parser
 from loguru import logger
 
 
@@ -73,12 +73,14 @@ def main(args):
             count += 1
 
     tq = tqdm(total=count)
+    parser = Parser(args.task)
 
     with open(data_pth) as f:
         for line in f:
             input = json.loads(line)["input"]
             inputs = prompt + input
             res = aot.run(inputs)
+            res = parser.parse(res)
             tq.update(1)
             output = {"input": input, "output": res}
             with open(
