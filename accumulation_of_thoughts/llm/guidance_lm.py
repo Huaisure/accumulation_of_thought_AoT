@@ -1,7 +1,9 @@
 from guidance import models, system, user, assistant
 from guidance import gen
 
-import ipdb
+import torch
+
+# import ipdb
 
 
 class GuidanceLM:
@@ -17,13 +19,18 @@ class GuidanceLM:
                 base_url=" ",
             )
         else:
-            self.llm = models.TransformersChat(model_name, echo=False)
+            self.llm = models.TransformersChat(
+                model_name,
+                echo=False,
+                device="cuda:0",
+                torch_dtype=torch.bfloat16,
+            )
 
     def get_response(self, system_prompt, user_prompt, assistant_prompt=None):
         lm = self.llm
         with system():
             lm += system_prompt
-            ipdb.set_trace()
+            # ipdb.set_trace()
         with user():
             lm += user_prompt
         with assistant():

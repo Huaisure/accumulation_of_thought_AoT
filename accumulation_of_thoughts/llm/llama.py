@@ -33,8 +33,9 @@ class Pipeline:
             temperature=0.4,
             top_p=0.9,
         )
-        length = len(prompt) + len(instruct) if instruct is not None else len(prompt)
-        response = outputs[0]["generated_text"][length:].strip()
+        # length = len(prompt) + len(instruct) if instruct is not None else len(prompt)
+
+        response = outputs[0]["generated_text"][len(inputs) :].strip()
         return response
 
     def prompt2messages(self, prompt, instruct=None):

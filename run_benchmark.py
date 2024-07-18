@@ -9,8 +9,8 @@ from loguru import logger
 
 def main(args):
     GameOf24 = """
-    Let's play a game called 24. You'll be given four integers, and your objective is to use each number only once, combined with any of the four arithmetic operations (addition, subtraction, multiplication, and division) and parentheses, to achieve a total of 24. For example, if the input is 4, 7, 8, and 8, the output could be 7 * 8 - 4 * 8 = 24. You only need to find one feasible solution!
-    Input:
+    We are going to play a game called 24. You will be given four integers, and your objective is to use each number exactly once, combined with any of the four arithmetic operations (addition, subtraction, multiplication, and division) and parentheses, to achieve a total of 24. Follow the example and the thought template below to solve the problem.
+    Four integers: 
     """
     CheckmateInOne = """
     Given a series of chess moves written in Standard Algebraic Notation (SAN), determine the next move that will result in a checkmate.
@@ -48,7 +48,7 @@ def main(args):
         template_pth=args.template,
         threshold=args.threshold,
         inputs=None,
-        use_guidance=True,
+        use_guidance=args.use_guidance,
         logger=logger,
     )
 
@@ -98,6 +98,7 @@ if __name__ == "__main__":
     parser.add_argument("--emb", type=str, default=None, help="Path to embeddings")
     parser.add_argument("--template", "-t", type=str, default=None, help="Path to templates")
     parser.add_argument("--threshold", type=float, default=0.5, help="Threshold for similarity")
+    parser.add_argument("--use_guidance", action="store_true", default=False, help="Use guidance model")
     args = parser.parse_args()
 
     main(args)
