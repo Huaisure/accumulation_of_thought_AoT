@@ -1,5 +1,5 @@
 from .thoughts_manager import ThoughtsManager, ThoughtsTemplate, Retriever
-from .prompts import BasicPrompt, NewTemplatePrompt
+from .prompts import BasicPrompt, NewTemplatePrompt, SpecificPrompt
 
 
 class AccumulationOfThoughts:
@@ -46,9 +46,6 @@ class AccumulationOfThoughts:
     def get_template(self):
         self.template = self.thoughts_manager.get_template(self.task)
 
-    # def update_template(self, idx, new_template):
-    #     self.thoughts_template.update(idx, new_template)
-
     def update_input(self, new_input):
         self.task = new_input
         self.has_template = False
@@ -57,26 +54,7 @@ class AccumulationOfThoughts:
         self.update_input(new_input)
         self.get_template()
         self.logger.success("Get template successfully!")
-        self.logger.info(f"Template: {self.template}")
-        system_prompt = BasicPrompt.system_prompt
-        user_prompt = BasicPrompt.user_prompt.format(
-            user_input=self.task,
-            D=self.template["D"],
-            M=self.template["M"],
-            Q=self.template["E"]["Q"],
-            A=self.template["E"]["A"],
-            C=self.template["C"],
-        )
-        test = 1
-        if test:
-            system_prompt = BasicPrompt.system_prompt_without_classification
-            user_prompt = BasicPrompt.user_prompt_without_classification.format(
-                user_input=self.task,
-                D=self.template["D"],
-                M=self.template["M"],
-                Q=self.template["E"]["Q"],
-                A=self.template["E"]["A"],
-            )
+        system_prompt, user_prompt = SpecificPrompt.format(self.task, self.template)
         self.logger.info(f"*********user_prompt**********\n {user_prompt}")
         response = self.llm.get_response(system_prompt, user_prompt)
         self.logger.info(f"**********Response***********\n {response}")
