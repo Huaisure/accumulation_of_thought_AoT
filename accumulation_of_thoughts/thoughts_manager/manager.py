@@ -1,5 +1,5 @@
 from .retriever import Retriever
-from .thoughts_template import ThoughtsTemplate
+from .item import ThoughtItem
 from .sentence_model import SentenceModel
 from ..llm import GPT, Pipeline, GuidanceLM
 from ..prompts import NewTemplatePrompt, UpgradePrompt
@@ -42,11 +42,11 @@ class ThoughtsManager:
         self.search_all = execute_search_all
         self.llm = llm_assistant
         self.sentencemodel = SentenceModel(sentence_model_name)
-        # self.thoughts_template = ThoughtsTemplate(thoughts_template_path)
+        # self.thoughts_template = ThoughtItem(thoughts_template_path)
         self.retriever = Retriever(self.sentencemodel, self.emb, self.threshold)
         self.logger = logger
 
-    def get_template(self, task) -> ThoughtsTemplate:
+    def get_template(self, task) -> ThoughtItem:
         """
         get the corresponding template given a task
         """
@@ -57,15 +57,15 @@ class ThoughtsManager:
             # create a new template
             return self._create_template_according_to_task(task)
         else:
-            return ThoughtsTemplate(self.path, idx)
+            return ThoughtItem(self.path, idx)
 
-    def _create_template_according_to_task(self) -> ThoughtsTemplate:
+    def _create_template_according_to_task(self) -> ThoughtItem:
         """
         this method is used to create a new template according to the task,
         considering some tasks may not have a template in the template file.
         """
         # find the most similar template
-        template = ThoughtsTemplate(
+        template = ThoughtItem(
             self.path, self.retriever.search(self.task, create=True)
         )
         system_prompt = NewTemplatePrompt.system_prompt
@@ -77,7 +77,7 @@ class ThoughtsManager:
         )
         return self._extract_template_from_response(template_response, assistant_prompt)
 
-    def _extract_template_from_response(self, response, assist) -> ThoughtsTemplate:
+    def _extract_template_from_response(self, response, assist) -> ThoughtItem:
         """
         extract the template from the response from gpt
         """
@@ -93,23 +93,23 @@ class ThoughtsManager:
             tmp["E"]["Q"] = response[assist[3]]
             tmp["E"]["A"] = response[assist[4]]
             tmp["C"] = response[assist[5]]
-            return ThoughtsTemplate(**tmp)
+            return ThoughtItem(**tmp)
         else:
             raise NotImplementedError("The method is not implemented yet")
 
-    def extract_template_from_qa_pairs(self, qa_pairs) -> ThoughtsTemplate:
+    def extract_template_from_qa_pairs(self, qa_pairs) -> ThoughtItem:
         """
         extract the thoughts template from a list of qa pairs
         """
         for qa_pair in qa_pairs:
             self._extract_template_from_qa_pair(qa_pair)
 
-    def _extract_template_from_qa_pair(self, qa_pair) -> ThoughtsTemplate:
+    def _extract_template_from_qa_pair(self, qa_pair) -> ThoughtItem:
         # TODO
         pass
 
     def upgrade_template(
-        self, new_task: str, new_answer: str, old_template: ThoughtsTemplate
+        self, new_task: str, new_answer: str, old_template: ThoughtItem
     ):
         """
         upgrade the template
@@ -118,7 +118,7 @@ class ThoughtsManager:
         old_template.upgrade(new_template)
 
     def _learn_from_new_task(
-        self, new_task: str, new_answer: str, old_template: ThoughtsTemplate
+        self, new_task: str, new_answer: str, old_template: ThoughtItem
     ):
         """
         learn from the new task and the answer

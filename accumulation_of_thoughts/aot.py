@@ -43,15 +43,26 @@ class AccumulationOfThoughts:
         self.task = inputs
         self.has_template = False
 
-    def get_template(self):
+    def get_template(self) -> ThoughtsTemplate:
+        """
+        Get the template for the current task
+
+        Returns:
+            ThoughtsTemplate: The template for the task
+        """
         self.template = self.thoughts_manager.get_template(self.task)
 
-    def update_input(self, new_input):
+    def _update_input(self, new_input):
+        """
+        Update the input task details
+        Args:
+            new_input (str): The new input task details
+        """
         self.task = new_input
         self.has_template = False
 
     def run(self, new_input):
-        self.update_input(new_input)
+        self._update_input(new_input)
         self.get_template()
         self.logger.success("Get template successfully!")
         # system_prompt, user_prompt = SpecificPrompt.format(self.task, self.template)

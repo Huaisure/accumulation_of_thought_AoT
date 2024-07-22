@@ -1,5 +1,5 @@
 TASK="gameof24"
-MODEL="gpt-3.5-turbo"
+MODEL="gpt-4o"
 SMODEL="/dfs/data/model/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 EMB="./emb.pth"
 TEMPLATE="./template.jsonl"
