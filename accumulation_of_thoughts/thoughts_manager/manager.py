@@ -6,6 +6,8 @@ from ..prompts import NewTemplatePrompt, UpgradePrompt
 
 from typing import Union
 
+import json
+
 
 class ThoughtsManager:
     """
@@ -65,9 +67,7 @@ class ThoughtsManager:
         considering some tasks may not have a template in the template file.
         """
         # find the most similar template
-        template = ThoughtItem(
-            self.path, self.retriever.search(self.task, create=True)
-        )
+        template = ThoughtItem(self.path, self.retriever.search(self.task, create=True))
         system_prompt = NewTemplatePrompt.system_prompt
         user_prompt = NewTemplatePrompt.user_prompt.format(self.task, template)
         assistant_prompt = NewTemplatePrompt.assistant_prompt
@@ -135,5 +135,11 @@ class ThoughtsManager:
         return new_template
 
     def add_template(self, new_template):
+        if type(new_template) not in [dict, ThoughtItem]:
+            raise ValueError("The new template should be a dict or a ThoughtItem.")
+        if type(new_template) is ThoughtItem:
+            new_template = json.dumps(new_template.data)
+        else:
+            new_template = json.dumps(new_template)
         with open(self.path, "a") as file:
             file.write(new_template)

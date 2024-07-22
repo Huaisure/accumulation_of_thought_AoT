@@ -11,7 +11,7 @@ class ThoughtItem:
         description: str, the description of the thought task
         method: dict, the method to solve the task
             - flow: list, the flow of the solving process
-            - has_code: bool, whether the method has code
+            - has code: bool, whether the method has code
             - code: str, the pseudo code
             - code explanation: list, the explanation of the code
         constraints: list, the constraints of the thought task
@@ -19,6 +19,15 @@ class ThoughtItem:
         category: str, the category of the thought task
 
     """
+
+    KEY_DICT = {
+        "id": "int, the id of the thought item",
+        "description": "str, the description of the thought task",
+        "method": "dict, the method to solve the task",
+        "constraints": "list, the constraints of the thought task",
+        "format": "str, the format of the output",
+        "category": "str, the category of the thought task",
+    }
 
     def __init__(self, path: str = None, idx: int = None):
         """
@@ -71,3 +80,12 @@ class ThoughtItem:
         with open(self.path, "w") as f:
             for line in new_file:
                 f.write(line)
+
+    def __repr__(self):
+        return f"ThoughtItem({self.data})"
+
+    def help(self):
+        """
+        return the key dict
+        """
+        return self.KEY_DICT
