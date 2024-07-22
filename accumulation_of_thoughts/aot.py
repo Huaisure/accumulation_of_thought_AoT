@@ -54,8 +54,11 @@ class AccumulationOfThoughts:
         self.update_input(new_input)
         self.get_template()
         self.logger.success("Get template successfully!")
-        system_prompt, user_prompt = SpecificPrompt.format(self.task, self.template)
+        # system_prompt, user_prompt = SpecificPrompt.format(self.task, self.template)
+        system_prompt, user_prompt = BasicPrompt.format(self.task, self.template)
         self.logger.info(f"*********user_prompt**********\n {user_prompt}")
-        response = self.llm.get_response(system_prompt, user_prompt)
+        response = self.llm.get_response(
+            system_prompt=system_prompt, user_prompt=user_prompt
+        )
         self.logger.info(f"**********Response***********\n {response}")
         return response

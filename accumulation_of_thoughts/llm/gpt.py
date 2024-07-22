@@ -6,8 +6,8 @@ class GPT:
         self.api_key = api_key
         self.model_id = model_id
 
-    def get_response(self, prompt, instruct=None):
-        messages = self.prompt2messages(prompt, instruct)
+    def get_response(self, user_prompt, system_prompt=None):
+        messages = self.prompt2messages(user_prompt, system_prompt)
         client = openai.OpenAI(
             api_key=self.api_key, base_url="https://threefive.gpt7.link/v1"
         )
@@ -17,9 +17,9 @@ class GPT:
         # print("response:",response)
         return response.choices[0].message.content
 
-    def prompt2messages(self, prompt, instruct=None):
+    def prompt2messages(self, user_prompt, system_prompt=None):
         messages = []
-        if instruct is not None:
-            messages.append({"role": "system", "content": instruct})
-        messages.append({"role": "user", "content": prompt})
+        if system_prompt is not None:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_prompt})
         return messages

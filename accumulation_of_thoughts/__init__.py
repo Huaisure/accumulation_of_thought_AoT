@@ -1,3 +1,3 @@
 from .aot import AccumulationOfThoughts
 from .thoughts_manager import ThoughtsManager, ThoughtsTemplate
-from .prompts import Parser
+from .parser import Parser
