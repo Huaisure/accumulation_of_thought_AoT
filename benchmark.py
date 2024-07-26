@@ -6,19 +6,21 @@ Prompt Function Method
 Task: Game of 24
 """
 
-from .prompt_of_function.env.gameof24.gameof24_solver import GameOf24Solver
-from .llm import GPT
+from prompt_of_function.env.gameof24.gameof24_solver import GameOf24Solver
+from llm import GPT
 from loguru import logger
 import argparse
 import datetime
 import json
+
+import ipdb
 
 
 def run_task(task: str, solver: GameOf24Solver) -> str:
     return solver.solve_with_compress(task)
 
 
-def benchmark(task_path: str, solver: GameOf24Solver):
+def benchmark(task_path: str, solver: GameOf24Solver, model_id: str):
     logger.remove()
     today = datetime.date.today().strftime("%m-%d")
     now = datetime.datetime.now().strftime("%H-%M-%S")
@@ -35,8 +37,10 @@ def benchmark(task_path: str, solver: GameOf24Solver):
         res = run_task(task_str, solver)
         logger.info(f"Result: {res}")
         results.append({"input": task_str, "output": res})
+        # for test
+        ipdb.set_trace()
 
-    with open(f"results/gameof24/{today}/{now}.json", "w") as f:
+    with open(f"experiments/gameof24/{today}/{model_id}_{now}.json", "w") as f:
         for res in results:
             f.write(json.dumps(res) + "\n")
     logger.info("** End Benchmarking Game of 24 **")
@@ -45,11 +49,11 @@ def benchmark(task_path: str, solver: GameOf24Solver):
 if __name__ == "__main__":
     # fmt: off
     parser = argparse.ArgumentParser(description="Run benchmark")
-    parser.add_argument("--model", type=str, default="gpt4o", help="Model name")
+    parser.add_argument("--model", type=str, default="gpt-4o", help="Model name")
     parser.add_argument("--api_key", type=str, default=None, help="API key")
     parser.add_argument("--benchmark_path", type=str, default="benchmarks/gameof24.jsonl", help="Path to the benchmark file")
     args = parser.parse_args()
 
-    assistant = GPT(model=args.model, api_key=args.api_key)
+    assistant = GPT(model_id=args.model, api_key=args.api_key)
     solver = GameOf24Solver(assistant)
-    benchmark(args.benchmark_path, solver)
+    benchmark(args.benchmark_path, solver, args.model)

@@ -115,22 +115,7 @@ class GameOf24Solver(FunctionSolverBase):
         logger.info("Stage 2 result:\n" + str(self.stage2_result))
         logger.info("Second round list:\n" + str(self.second_round_list))
 
-        self._stage3()
         # # ** Stage 3 begin **
-        # logger.success("#################### Stage 3 ####################")
-        # self.stage3 = self.set_stage(
-        #     func_list=[self.func["Evaluate"], self.func["parsefinalanswer"]],
-        #     task=STAGE3_TASK.format(list=self.second_round_list),
-        #     outermost_func=self.func["parsefinalanswer"],
-        # )
-        # self.stage3_result = self.stage3.solve()
-        # self.result = self.stage3_result
-        # logger.info("Stage 3 result:\n" + self.stage3_result)
-        # logger.info("Result:\n" + self.result)
-        # return self.result
-
-    def _stage3(self):
-        # ** Stage 3 begin **
         logger.success("#################### Stage 3 ####################")
         self.stage3_result = []
         self.third_round_list = []
@@ -171,9 +156,9 @@ class GameOf24Solver(FunctionSolverBase):
         Handwritten compression function, different from the previous compression using GPT
         """
         self.task = task
-        time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        logger.remove()
-        logger.add(f"logs/game_of_24_{time}.log", rotation="1 day")
+        # time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        # logger.remove()
+        # logger.add(f"logs/game_of_24_{time}.log", rotation="1 day")
 
         # ** Stage 1 begin **
         logger.success("#################### Stage 1 ####################")
@@ -223,10 +208,10 @@ class GameOf24Solver(FunctionSolverBase):
             outermost_func=self.func["Evaluate"],
         )
         self.result = None
-        for i in range(0, len(self.second_round_list), self.batch_size * 5):
+        for i in range(0, len(self.second_round_list), self.batch_size * 3):
             self.stage3.update_task(
                 STAGE3_TASK.format(
-                    list=self.second_round_list[i : i + self.batch_size * 5],
+                    list=self.second_round_list[i : i + self.batch_size * 3],
                     task="[3,3,8,8]",
                 )
             )

@@ -11,9 +11,9 @@ GAME_OF_24_FUNC_DICT_LIST = [
             (2) select (1+2) and 4: [((1+2)+4),3],[((1+2)-4),3],[((1+2)*4),3],[((1+2)/4),3],[(4-(1+2)),3],[(4/(1+2)),3]
             (3) select 3 and 4: [(1+2),(3+4)],[(1+2),(3-4)],[(1+2),(3*4)],[(1+2),(3/4)],[(1+2),(4-3)],[(1+2),(4/3)]
         -> output: [[((1+2)+3),4],[((1+2)-3),4],[((1+2)*3),4],[((1+2)/3),4],[(3-(1+2)),4],[3/(1+2),4],[((1+2)+4),3],[((1+2)-4),3],[((1+2)*4),3],[((1+2)/4),3],[(4-(1+2)),3],[(4/(1+2)),3],[(1+2),(3+4)],[(1+2),(3-4)],[(1+2),(3*4)],[(1+2),(3/4)],[(1+2),(4-3)],[(1+2),(4/3)]]""",
-            "Guidelines:"
-            "   Add parentheses to the expression formed by the two selected terms, e.g., select (1+2) and 3, then output is [((1+2)+3),4] not [(1+2)+3,4]",
-            "   Treat the contents of the brackets as a whole and do not break them apart",
+            """Guidelines:
+        - Add parentheses to the expression formed by the two selected terms, e.g., select (1+2) and 3, then output is [((1+2)+3),4] not [(1+2)+3,4],
+        - Treat the contents of the brackets as a whole and do not break them apart""",
         ],
     },
     {
@@ -61,9 +61,21 @@ GAME_OF_24_FUNC_DICT_LIST = [
         "name": "Evaluate",
         "input": ["A list that each item is a list of numbers or expressions"],
         "rule": [
-            "Evaluate24() is defined above.",
             "For each item in the input list: Evaluate24(item) -> output: [expression or None]",
             "Synthesise all the output, returning the [expression] if it exists, or [None] if all the results are None.",
+            """Example:
+        1) input=[[6,(7+(12+10))],[12,(6/(10-7))],[10,(6*(12-7))]]
+        For each item:
+            (1) Evaluate24([6,(7+(12+10))]) -> output: [None]
+            (2) Evaluate24([12,(6/(10-7))]) -> output: [(12*(6/(10-7)))]
+            (3) Evaluate24([10,(6*(12-7))]) -> output: [None]
+        -> output: [(12*(6/(10-7)))]
+
+        2) input=[[3,(3+(8+8))],[(8-8),(3*3)]]
+        For each item:
+            (1) Evaluate24([3,(3+(8+8))]) -> output: [None]
+            (2) Evaluate24([(8-8),(3*3)]) -> output: [None]
+        -> output: [None]""",
         ],
     },
     {
