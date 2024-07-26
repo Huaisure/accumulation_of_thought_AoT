@@ -12,7 +12,9 @@ class Retriever:
     Search for the most relevant thoughts template
     """
 
-    def __init__(self, model, template_embedding_path, threshold=0.5):
+    def __init__(
+        self, model: SentenceModel, template_embedding_path: str, threshold: float = 0.5
+    ):
         self.emb = torch.load(template_embedding_path)
         self.model = model
         self.threshold = threshold

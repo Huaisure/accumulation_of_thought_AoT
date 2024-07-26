@@ -1,4 +1,4 @@
-from .thoughts_manager import ThoughtsManager, ThoughtsTemplate, Retriever
+from .thoughts_manager import ThoughtsManager, ThoughtItem, Retriever
 from .prompts import BasicPrompt, NewTemplatePrompt, SpecificPrompt
 
 
@@ -43,12 +43,12 @@ class AccumulationOfThoughts:
         self.task = inputs
         self.has_template = False
 
-    def get_template(self) -> ThoughtsTemplate:
+    def get_template(self) -> ThoughtItem:
         """
         Get the template for the current task
 
         Returns:
-            ThoughtsTemplate: The template for the task
+            ThoughtItem: The template for the task
         """
         self.template = self.thoughts_manager.get_template(self.task)
 

@@ -17,6 +17,7 @@ class FunctionSolverBase:
 
     Args:
         functions (List[PromptFunction]): The functions defined by the user
+        func (Dict[str,PromptFunction]): The function dictionary
 
     Methods:
 
@@ -26,8 +27,22 @@ class FunctionSolverBase:
         self.functions: List[PromptFunction] = []
         self.func: Dict[str, PromptFunction] = {}
 
-    def define_function(self):
+    def define_function_all(self):
+        """
+        Define all the involved functions
+
+        Usually used at the beginning of the user prompt
+        """
         return PromptFunction.function_definition(self.functions)
+
+    def define_function(self, func_list: List[PromptFunction]):
+        """
+        Define the function
+
+        Args:
+            func_list (List[PromptFuntion]): the functions list to define
+        """
+        return PromptFunction.function_definition(func_list)
 
     def load_function(self, func_dict_list: List[dict]):
         """

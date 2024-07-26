@@ -25,7 +25,7 @@ Guidelines:
 - Please follow the function definition format strictly.
 - Ensure that the output adheres to the provided rules.
 - Output as requested, no explanation is needed.
-- Use the probided functions, not define new ones.
+- Note the formatting, examples are given in the function rules.
 """
 
 
@@ -59,6 +59,7 @@ Rules:
         """
         Parse the output from the response
         """
+        res = None
         response = response.split("function")
         for r in response:
             if self.name in r:
@@ -66,7 +67,7 @@ Rules:
                 for rr in r:
                     if "output" in rr:
                         r = rr
-                res = r.split("-> output:")[-1].strip()
+                res = r.split("output")[-1].strip(" :")
         return res
 
     @staticmethod

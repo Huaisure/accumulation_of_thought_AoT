@@ -1,4 +1,4 @@
-from .function import PromptFunction, PROMPT_FUNCTION_SYSTEM_PROMPT
+from .function.function import PromptFunction, PROMPT_FUNCTION_SYSTEM_PROMPT
 from ..llm import GPT
 
 # python -m accumulation_of_thoughts.prompt_function.test_function

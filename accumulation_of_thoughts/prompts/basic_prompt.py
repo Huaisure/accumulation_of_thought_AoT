@@ -9,22 +9,18 @@ class BasicPrompt:
         Returns:
             tuple: A tuple containing the system prompt and the user prompt.
         """
-        problem_description = task["Description"]
-        constraints = "\n- ".join(task["Constraints"])
-        output_format = task["Format"]
-        solving_process_flow = "\n    - ".join(template["Method"]["Flow"])
-        pseudo_code = template["Method"]["Code"]
-        explanation = "\n    - ".join(template["Method"]["Code Explanation"])
-        system_prompt = """
-You are an advanced language model designed to assist with complex tasks. Your objective is to follow the instructions and constraints provided to generate accurate and reliable solutions. For each task, ensure you adhere to the specified constraints, use the given method, and produce the output in the required format.
 
-- Constraints: Follow all the constraints provided to ensure the solution is valid.
-- Output Format: Present the final answer in the specified format.
-- Method: Use the provided method, which may include a flow of the solving process and pseudo-code with explanations, to arrive at the solution.
+        # Extract relevant information from the task and template
+        problem_description = template["description"]
+        constraints = "\n- ".join(template["constraints"])
+        output_format = template["format"]
+        solving_process_flow = "\n    - ".join(template["method"]["flow"])
+        has_code = template["method"]["has code"]
+        if has_code:
+            pseudo_code = template["method"]["code"]
+            explanation = "\n    - ".join(template["method"]["code explanation"])
 
-Your responses should be clear, concise, and adhere strictly to the provided guidelines.
-"""
-        user_prompt = f"""
+            user_prompt = f"""
 You are given the task of solving the following problem:
 
 **Current Problem:**
@@ -47,5 +43,17 @@ You are given the task of solving the following problem:
 
 Using the information provided, generate a solution that adheres to the constraints and is presented in the specified format.
 """
-        # TODO: update the situation that there is no code provided
+        else:
+            # TODO: update the situation that there is no code provided
+            pass
+
+        system_prompt = """
+You are an advanced language model designed to assist with complex tasks. Your objective is to follow the instructions and constraints provided to generate accurate and reliable solutions. For each task, ensure you adhere to the specified constraints, use the given method, and produce the output in the required format.
+
+- Constraints: Follow all the constraints provided to ensure the solution is valid.
+- Output Format: Present the final answer in the specified format.
+- Method: Use the provided method, which may include a flow of the solving process and pseudo-code with explanations, to arrive at the solution.
+
+Your responses should be clear, concise, and adhere strictly to the provided guidelines.
+"""
         return system_prompt, user_prompt

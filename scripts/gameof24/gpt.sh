@@ -1,9 +1,9 @@
 TASK="gameof24"
 MODEL="gpt-4o"
-SMODEL="/dfs/data/model/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+SMODEL="D:\Workspace\lenovo%20intern\model\sentence"
 EMB="./emb.pth"
 TEMPLATE="./template.jsonl"
-API_KEY="sk-lkXfNCALr3fB33Pv799894F979Af4f42A0827cFe5a3a8169"
+API_KEY="sk-Jp9YCIcVzEiwgIgg87F463EdC7F84992B8CcC4D6459d505a"
 
 python run_benchmark.py \
     --task $TASK \
