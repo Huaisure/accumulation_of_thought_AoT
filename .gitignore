@@ -2,4 +2,4 @@ test.py
 *.pyc
 accumulation_of_thoughts/prompts/test.jsonl
 logs/
-
+.vscode/

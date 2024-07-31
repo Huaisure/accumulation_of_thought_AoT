@@ -3,14 +3,14 @@ import json
 import datetime
 
 from tqdm import tqdm
-from accumulation_of_thoughts import AccumulationOfThoughts, Parser
+from acot import AccumulationOfThoughts, Parser
 from loguru import logger
 
 
 def main(args):
     GameOf24 = """
     We are going to play a game called 24. You will be given four integers, and your objective is to use each number exactly once, combined with any of the four arithmetic operations (addition, subtraction, multiplication, and division) and parentheses, to achieve a total of 24. Follow the example and the thought template below to solve the problem.
-    Four integers: 
+    Four integers:
     """
     CheckmateInOne = """
     Given a series of chess moves written in Standard Algebraic Notation (SAN), determine the next move that will result in a checkmate.
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # fmt: off
     parser = argparse.ArgumentParser(description="Run benchmark for Accumulation of Thoughts")
     parser.add_argument("--task", type=str, default="gameof24", help="Task name")
-    parser.add_argument("--model", type=str, default="gpt4o", help="Model name")
+    parser.add_argument("--model", type=str, default="gpt-4o", help="Model name")
     parser.add_argument("--api_key", type=str, default=None, help="API key")
     parser.add_argument("--smodel", "-s", type=str, default=None, required=True, help="Sentence model name")
     parser.add_argument("--emb", type=str, default=None, help="Path to embeddings")

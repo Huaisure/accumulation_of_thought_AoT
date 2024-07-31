@@ -3,7 +3,7 @@ from ..llm import GPT
 
 # python -m accumulation_of_thoughts.prompt_function.test_function
 
-api_key = "sk-Jp9YCIcVzEiwgIgg87F463EdC7F84992B8CcC4D6459d505a"
+api_key = "API_KEY"
 model_id = "gpt-4o"
 gpt = GPT(api_key=api_key, model_id=model_id)
 

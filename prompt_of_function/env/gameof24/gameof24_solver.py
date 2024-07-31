@@ -1,9 +1,8 @@
-from ...function.function import PROMPT_FUNCTION_SYSTEM_PROMPT, PromptFunction
-from ...function.solver import FunctionSolverBase
+from ...function.solver_base import FunctionSolverBase
+from ...function.evaluate_solver import EvaluateSolver
 from .func_dict_list import GAME_OF_24_FUNC_DICT_LIST
-from ...utlis import parselist, compress
-from ...function.solve_stage import SolveStage
-from .gameof24_prompt import (
+from ...utlis import parselist, compress, evaluate, task_preprocess
+from .gameof24_task import (
     STAGE1_TASK,
     STAGE2_TASK,
     STAGE3_TASK,
@@ -13,7 +12,6 @@ from .gameof24_prompt import (
 
 from typing import List, Dict
 from loguru import logger
-import datetime
 
 # python -m accumulation_of_thoughts.prompt_function.gameof24
 
@@ -32,6 +30,11 @@ class GameOf24Solver(FunctionSolverBase):
     >>> gameof24_solver.solve("3,3,8,8")
     """
 
+    task_description = "Game of 24: Given four numbers, return a list of expressions that can be combined to 24. Each number must be used once."
+    objective = (
+        "a list of expressions that contains each number excatly once and reach 24."
+    )
+
     def __init__(
         self,
         assistant,
@@ -46,23 +49,12 @@ class GameOf24Solver(FunctionSolverBase):
         else:
             # At this time, we do not support the situation where the function list is empty
             raise ValueError("functions_list is required")
-        # self.func: Dict[str, PromptFunction] = {}
 
         self.first_round_list = None
         self.second_round_list = None
         self.third_round_list = None
         self.assistant = assistant
         self.batch_size = batch_size
-
-    def set_stage(self, func_list, task: str, outermost_func) -> SolveStage:
-        """set the stage"""
-        return SolveStage(
-            func_list,
-            task,
-            self.assistant,
-            outermost_func,
-            PROMPT_FUNCTION_SYSTEM_PROMPT,
-        )
 
     def solve(self, task: str = "3,3,8,8") -> str:
         """
@@ -82,11 +74,12 @@ class GameOf24Solver(FunctionSolverBase):
 
         # ** Stage 1 begin **
         logger.success("#################### Stage 1 ####################")
-        self.stage1 = self.set_stage(
+        self._set_stage(
             func_list=[self.func["Compression"], self.func["Choose2Numbers"]],
-            task=STAGE1_TASK.format(task=self.task),
+            task=STAGE1_TASK.format(task=task_preprocess(self.task)),
             outermost_func=self.func["Compression"],
         )
+        self.stage1 = self.solve_stage[0]
         self.stage1_result = self.stage1.solve()
         self.first_round_list = parselist(self.stage1_result)
         logger.info("Stage 1 result:\n" + self.stage1_result)
@@ -96,7 +89,7 @@ class GameOf24Solver(FunctionSolverBase):
         logger.success("#################### Stage 2 ####################")
         self.stage2_result = []
         self.second_round_list = []
-        self.stage2 = self.set_stage(
+        self._set_stage(
             func_list=[
                 self.func["Compression"],
                 self.func["Choose2Numbers"],
@@ -105,6 +98,7 @@ class GameOf24Solver(FunctionSolverBase):
             task=None,
             outermost_func=self.func["Compression"],
         )
+        self.stage2 = self.solve_stage[1]
         # due to the limitation of max token, decompose first round list in piece
         for i in range(0, len(self.first_round_list), self.batch_size):
             self.stage2.update_task(
@@ -119,11 +113,12 @@ class GameOf24Solver(FunctionSolverBase):
         logger.success("#################### Stage 3 ####################")
         self.stage3_result = []
         self.third_round_list = []
-        self.stage3 = self.set_stage(
+        self._set_stage(
             func_list=[self.func["Evaluate"]],
             task=None,
             outermost_func=self.func["Evaluate"],
         )
+        self.stage3 = self.solve_stage[2]
         self.result = None
         # due to the limitation of max token, decompose first round list in piece
         for i in range(0, len(self.second_round_list), self.batch_size * 3):
@@ -162,25 +157,33 @@ class GameOf24Solver(FunctionSolverBase):
 
         # ** Stage 1 begin **
         logger.success("#################### Stage 1 ####################")
-        self.stage1 = self.set_stage(
+        self._set_stage(
             func_list=[self.func["Choose2Numbers"]],
-            task=STAGE1_TASK_WITHOUT_COMPRESSION.format(task=self.task),
+            task=STAGE1_TASK_WITHOUT_COMPRESSION.format(
+                task=task_preprocess(self.task)
+            ),
             outermost_func=self.func["Choose2Numbers"],
         )
+        self.stage1 = self.solve_stage[0]
         self.stage1_result = self.stage1.solve()
         self.first_round_list = compress(parselist(self.stage1_result))
         # logger.info("Stage 1 result:\n" + self.stage1_result)
         logger.info("First round list:\n" + str(self.first_round_list))
+        logger.info("First round list length: " + str(len(self.first_round_list)))
 
         # ** Stage 2 begin **
         logger.success("#################### Stage 2 ####################")
         self.stage2_result = []
         self.second_round_list = []
-        self.stage2 = self.set_stage(
-            func_list=[self.func["Choose2NumbersForEachItem"]],
+        self._set_stage(
+            func_list=[
+                self.func["Choose2Numbers"],
+                self.func["Choose2NumbersForEachItem"],
+            ],
             task=None,
             outermost_func=self.func["Choose2NumbersForEachItem"],
         )
+        self.stage2 = self.solve_stage[1]
         # due to the limitation of max token, decompose first round list in piece
         for i in range(0, len(self.first_round_list), self.batch_size):
             self.stage2.update_task(
@@ -193,8 +196,10 @@ class GameOf24Solver(FunctionSolverBase):
         self.second_round_list = compress(self.second_round_list)
         # logger.info("Stage 2 result:\n" + str(self.stage2_result))
         logger.info("Second round list:\n" + str(self.second_round_list))
+        logger.info("Second round list length: " + str(len(self.second_round_list)))
 
         # ** Stage 3 begin **
+        """
         logger.success("#################### Stage 3 ####################")
         self.stage3_result = []
         self.third_round_list = []
@@ -223,15 +228,53 @@ class GameOf24Solver(FunctionSolverBase):
                     break
             if self.result:
                 break
+        """
 
+        # Stage 3 Plan B:
+        # abondon Evaluate and return the whole list, then stage3.function equals to stage2.function
+        logger.success("#################### Stage 3 ####################")
+        self.stage3_result = []
+        self.third_round_list = []
+        self.stage3 = self.stage2
+        batch_size_stage3 = self.batch_size * 3
+        for i in range(0, len(self.second_round_list), batch_size_stage3):
+            self.stage3.update_task(
+                STAGE2_TASK_WITHOUT_COMPRESSION.format(
+                    list=self.second_round_list[i : i + batch_size_stage3]
+                )
+            )
+            self.stage3_result.append(self.stage3.solve())
+            self.third_round_list = parselist(self.stage3_result[-1])
+            self.result = evaluate(self.third_round_list)
+            if self.result:
+                # logger.info("Stage 3 result:\n" + str(self.stage3_result))
+                logger.info("Result:\n" + self.result)
+                return self.result
+        logger.error("No solution found")
+        return "No solution found"
 
-# if __name__ == "__main__":
-#     api_key = "sk-Jp9YCIcVzEiwgIgg87F463EdC7F84992B8CcC4D6459d505a"
-#     model_id = "gpt-4o"
-#     assistant = GPT(api_key, model_id)
-#     gameof24_solver = GameOf24Solver(
-#         assistant, functions_list=GAME_OF_24_FUNC_DICT_LIST
-#     )
+    def evaluate_states(self, current_states: List[str]) -> List[float]:
+        """
+        Evaluate the states
 
-#     gameof24_solver.solve_with_compress()
-# gameof24_solver.solve_without_compression()
+        Args:
+            current_states (List[str]): The current states
+
+        Returns:
+            List[float]: The probabilities of the states
+        """
+        evaluate_solver_instance = EvaluateSolver(
+            self.task_description, self.objective, current_states, self.assistant
+        )
+        return parselist(evaluate_solver_instance.solve())
+
+    def _test_evaluate(self):
+        test_states = [
+            "[((3+3)+8),8]",
+            "[(8/3),3,8]",
+            "[(3*3),8,8]",
+            "[(8*8),3,3]",
+            "[(3-(8/3)),8]",
+            "[((3*3)+8),8]",
+        ]
+        print(self.evaluate_states(test_states))

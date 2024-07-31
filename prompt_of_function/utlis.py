@@ -9,8 +9,12 @@ def parselist(string: str) -> List[str]:
     # to parse: "[[1,2,3],[4,5,6]]"
     # result:['[1,2,3]','[4,5,6]'] List[str]
     string = string.replace(" ", "")
-    string = string.strip("[] \n").split("],[")
-    ls = ["[" + s + "]" for s in string]
+    if "],[" not in string:
+        string = string.strip("[] \n").split(",")
+        return string
+    else:
+        string = string.strip("[] \n").split("],[")
+        ls = ["[" + s + "]" for s in string]
     return ls
 
 
@@ -121,3 +125,38 @@ def compress(ls: List[str]) -> List[str]:
     ls = replace_operators(ls)
     ls_, fixed_ls = parse_and_count(ls)
     return remove_duplicates(fixed_ls, ls_)
+
+
+def evaluate(ls: List[str]) -> str:
+    """
+    evaluate the list of expressions
+
+    if the expression = 24, return the expression
+
+    Args:
+        ls: A list of expressions
+
+    Returns:
+        A string of the expression that equals to 24
+    """
+    ls = replace_operators(ls)
+    for s in ls:
+        elements = s.strip("[]").split(",")
+        for elem in elements:
+            checked_elem = check_brackets(elem)
+            key = safe_eval(checked_elem)
+            if key:
+                if abs(float(key) - 24) < 1e-6:
+                    return checked_elem
+    return None
+
+
+def task_preprocess(task: str) -> str:
+    """
+    "a b c d" -> "[a,b,c,d]"
+    """
+    task = task.split(" ")
+    task = [t for t in task if t != ""]
+    task = ",".join(task)
+    task = "[" + task + "]"
+    return task
